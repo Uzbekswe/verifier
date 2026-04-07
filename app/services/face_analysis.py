@@ -1,5 +1,5 @@
 """
-Face detection + 468-landmark extraction + head pose estimation.
+Face detection + 478-landmark extraction + head pose estimation.
 Uses MediaPipe FaceLandmarker Tasks API (pretrained, no training needed).
 Head pose via PnP (Perspective-n-Point) solving with OpenCV.
 """

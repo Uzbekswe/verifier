@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import logging
 from dataclasses import dataclass
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +27,25 @@ class LivenessService:
         self._loaded = False
 
     def load(self):
-        """Pre-warm DeepFace anti-spoof models."""
+        """Pre-warm DeepFace anti-spoof models by running a dummy inference."""
         if not self._loaded:
             try:
-                # Trigger model download by importing
-                from deepface.modules import verification
+                import numpy as np
+                from deepface import DeepFace
+                # Run a tiny dummy image through extract_faces to trigger
+                # MiniFASNet weight download and model initialization.
+                dummy = np.zeros((64, 64, 3), dtype=np.uint8)
+                DeepFace.extract_faces(
+                    img_path=dummy,
+                    anti_spoofing=True,
+                    detector_backend="opencv",
+                )
                 self._loaded = True
                 logger.info("Liveness models ready (DeepFace/MiniFASNet)")
             except Exception as e:
-                logger.warning(f"Liveness model pre-warm failed: {e}. Will try at inference time.")
+                # Model download may fail on first cold start — it will retry at inference time.
+                logger.warning(f"Liveness model pre-warm failed: {e}. Will retry at inference time.")
+                self._loaded = True  # avoid retrying load() on every request
         return self
 
     def check(self, image_bgr: np.ndarray, face_bbox=None) -> LivenessResult:
@@ -75,14 +86,14 @@ class LivenessService:
             face_data = result[0]
 
             # DeepFace returns is_real and antispoof_score
-            is_real = face_data.get("is_real", False)
             antispoof_score = face_data.get("antispoof_score", 0.0)
 
             # antispoof_score: higher = more likely real
             score = float(antispoof_score)
+            is_live = score >= settings.LIVENESS_THRESHOLD
 
             return LivenessResult(
-                is_live=is_real,
+                is_live=is_live,
                 score=score,
                 is_real_prob=score,
                 is_spoof_prob=1.0 - score,

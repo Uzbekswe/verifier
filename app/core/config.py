@@ -15,9 +15,6 @@ class Settings(BaseSettings):
     # Liveness
     LIVENESS_THRESHOLD: float = 0.6   # min score to be considered live
 
-    # Face identity (cosine similarity)
-    IDENTITY_THRESHOLD: float = 0.6
-
     # Supported challenges
     CHALLENGES: list = ["look_left", "look_right", "look_up", "look_down", "smile"]
 

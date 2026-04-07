@@ -17,17 +17,6 @@ import io
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
-def download_test_face():
-    """Download a real face photo for testing (public domain)."""
-    try:
-        # Use a known face image URL that's public domain
-        url = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Gatto_europeo4.jpg/200px-Gatto_europeo4.jpg"
-        # Actually, use a generated face
-        return None
-    except Exception:
-        return None
-
-
 def create_synthetic_face_image(width=640, height=480, yaw_offset=0):
     """
     Create a synthetic face-like image for testing.

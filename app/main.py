@@ -51,7 +51,7 @@ Simulates the pose-challenge verification system used in apps like Bumble/Tinder
 
 ### Pipeline
 1. **Liveness detection** — MiniFASNet (Silent-Face-Anti-Spoofing) via DeepFace
-2. **Face landmark extraction** — MediaPipe FaceMesh (468 3D points)
+2. **Face landmark extraction** — MediaPipe FaceLandmarker (478 3D points)
 3. **Head pose estimation** — PnP solver (yaw/pitch/roll in degrees)
 4. **Challenge matching** — threshold-based pose verification
 
