@@ -1,0 +1,23 @@
+services:
+  api:
+    build: .
+    image: photo-verifier:latest
+    ports:
+      - "8000:7860"         # host port 8000 → container port 7860
+    env_file:
+      - .env                # optional: loads any .env overrides if present
+    environment:
+      - LOG_FORMAT=text     # human-readable logs for local development
+      - CV_THREAD_POOL_SIZE=4
+    volumes:
+      - deepface-cache:/root/.deepface   # persist DeepFace model weights across restarts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s     # models need ~30-60s to load on first start
+    restart: unless-stopped
+
+volumes:
+  deepface-cache:            # named volume so weights survive container recreation

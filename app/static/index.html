@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Verification</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Photo Verification</h1>
+      <p class="subtitle">Liveness + pose challenge — just like Bumble & Tinder</p>
+    </header>
+
+    <!-- Step 1: Get challenge -->
+    <div class="card" id="step-challenge">
+      <div class="step-label">Step 1</div>
+      <h2>Get your challenge</h2>
+      <p>Click below to receive a random pose challenge.</p>
+      <button id="btn-challenge" class="btn btn-primary">Get Challenge</button>
+
+      <div id="challenge-display" class="challenge-box hidden">
+        <div class="challenge-emoji" id="challenge-emoji"></div>
+        <div class="challenge-instruction" id="challenge-instruction"></div>
+        <div class="challenge-meta">Challenge ID: <code id="challenge-id"></code></div>
+      </div>
+    </div>
+
+    <!-- Step 2: Camera -->
+    <div class="card hidden" id="step-camera">
+      <div class="step-label">Step 2</div>
+      <h2>Take your selfie</h2>
+      <p id="camera-instruction"></p>
+      <div class="camera-wrapper">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="canvas" class="hidden"></canvas>
+        <img id="preview" class="hidden" alt="Captured photo" />
+      </div>
+      <div class="camera-buttons">
+        <button id="btn-capture" class="btn btn-primary">📸 Capture Photo</button>
+        <button id="btn-retake" class="btn btn-secondary hidden">↩ Retake</button>
+        <button id="btn-submit" class="btn btn-success hidden">✅ Submit for Verification</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Result -->
+    <div class="card hidden" id="step-result">
+      <div class="step-label">Step 3</div>
+      <h2>Result</h2>
+      <div id="result-banner" class="result-banner"></div>
+      <div id="result-details" class="result-details"></div>
+      <button id="btn-restart" class="btn btn-secondary">Try Again</button>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p id="loading-text">Processing...</p>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
