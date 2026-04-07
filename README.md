@@ -179,7 +179,7 @@ Build a backend API that verifies a user is a real, live human and can perform a
 
 ## Configuration
 
-Edit `app/core/config.py` to tune:
+Edit `app/core/config.py` to tune, or override any setting via a `.env` file (see `.env.example`):
 
 | Setting | Default | Meaning |
 |---------|---------|---------|
@@ -187,3 +187,35 @@ Edit `app/core/config.py` to tune:
 | `PITCH_THRESHOLD` | 12.0° | Degrees of tilt needed for look_up / look_down |
 | `LIVENESS_THRESHOLD` | 0.6 | Minimum anti-spoof score to pass |
 | `MAX_IMAGE_SIZE_MB` | 10 | Max upload size |
+| `MAX_IMAGE_DIMENSION` | 4096 | Max image width or height in pixels |
+| `CV_THREAD_POOL_SIZE` | 4 | Workers for blocking CV operations |
+| `RATE_LIMIT_GLOBAL` | 200/minute | Global rate limit per IP |
+| `RATE_LIMIT_SUBMIT` | 10/minute | Rate limit on `/verify/submit` |
+| `RATE_LIMIT_CHALLENGE` | 30/minute | Rate limit on `/verify/challenge` |
+| `LOG_LEVEL` | INFO | Python logging level |
+| `LOG_FORMAT` | json | `json` for production, `text` for development |
+
+---
+
+## Production Features
+
+This API is built production-grade out of the box:
+
+- **Async CV execution** — MediaPipe, OpenCV, and DeepFace all run in a dedicated `ThreadPoolExecutor` (`CV_THREAD_POOL_SIZE` workers), keeping the asyncio event loop unblocked under concurrent load.
+
+- **Structured JSON logging** — Every log line is emitted as JSON (via `python-json-logger`) with `request_id`, `logger`, `level`, and timing fields. Each request is assigned a correlation ID (from `X-Request-ID` header or auto-generated UUID) that propagates through all log lines for that request.
+
+- **Rate limiting** — `slowapi` enforces configurable per-IP rate limits globally and per-endpoint. Limits are stored in memory by default and can be switched to Redis (`RATE_LIMIT_STORAGE_URI=redis://...`) for multi-instance deployments.
+
+- **Prometheus metrics** at `/metrics` — `prometheus-fastapi-instrumentator` auto-instruments all routes. Domain-specific metrics include:
+  - `verification_attempts_total` (by challenge type and result)
+  - `cv_processing_seconds` (by pipeline stage: decode, face_analysis, liveness, total)
+  - `liveness_score_distribution`
+
+- **Typed error responses** — All errors return a consistent JSON shape `{ "error": { "error_code": "...", "message": "...", "request_id": "...", "context": {} } }` with machine-readable `error_code` values (`IMAGE_TOO_LARGE`, `INVALID_MIME_TYPE`, `RATE_LIMIT_EXCEEDED`, etc.).
+
+- **Input validation** — The `validated_image_bytes` dependency checks MIME type (JPEG/PNG/WebP only), file size, and image pixel dimensions (decompression bomb guard) before any CV processing begins.
+
+- **API versioned under `/api/v1`** — All endpoints live at `/api/v1/health`, `/api/v1/verify/challenge`, and `/api/v1/verify/submit/{challenge_type}`.
+
+- **`.env` support via pydantic-settings** — All settings can be overridden via environment variables or a `.env` file without touching source code. Copy `.env.example` to `.env` to get started.
