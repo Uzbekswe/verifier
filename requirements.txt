@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+mediapipe==0.10.33
+opencv-python-headless
+numpy
+pillow
+python-multipart
+deepface
+tf-keras
+pydantic-settings
