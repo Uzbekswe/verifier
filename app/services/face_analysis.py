@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 import logging
 import os
+import traceback
 import urllib.request
 
 logger = logging.getLogger(__name__)
@@ -77,9 +78,9 @@ class FaceAnalysisService:
                 base_options=base_options,
                 running_mode=mp_vision.RunningMode.IMAGE,
                 num_faces=1,
-                min_face_detection_confidence=0.5,
-                min_face_presence_confidence=0.5,
-                min_tracking_confidence=0.5,
+                min_face_detection_confidence=0.3,
+                min_face_presence_confidence=0.3,
+                min_tracking_confidence=0.3,
                 output_face_blendshapes=False,
                 output_facial_transformation_matrixes=False,
             )
@@ -99,6 +100,7 @@ class FaceAnalysisService:
 
             h, w = image_bgr.shape[:2]
             image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+            image_rgb = np.ascontiguousarray(image_rgb)
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
 
             result = self._detector.detect(mp_image)
@@ -137,7 +139,7 @@ class FaceAnalysisService:
                 face_bbox=bbox,
             )
         except Exception as e:
-            logger.warning(f"Face analysis failed: {e}")
+            logger.error(f"Face analysis failed: {e}\n{traceback.format_exc()}")
             return FaceAnalysis(face_detected=False)
 
     def _estimate_pose(self, lm_array: np.ndarray, img_w: int, img_h: int):
