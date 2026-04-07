@@ -14,11 +14,20 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 import logging
 import os
+import urllib.request
 
 logger = logging.getLogger(__name__)
 
 # Model path
 _MODEL_PATH = os.path.join(os.path.dirname(__file__), "../../models/face_landmarker.task")
+_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task"
+
+def _ensure_model():
+    if not os.path.exists(_MODEL_PATH):
+        os.makedirs(os.path.dirname(_MODEL_PATH), exist_ok=True)
+        logger.info("Downloading face_landmarker.task model...")
+        urllib.request.urlretrieve(_MODEL_URL, _MODEL_PATH)
+        logger.info("Model downloaded successfully.")
 
 # 3D reference face model points (canonical face geometry)
 FACE_3D_POINTS = np.array([
@@ -61,6 +70,7 @@ class FaceAnalysisService:
     def load(self):
         """Lazy-load MediaPipe FaceLandmarker."""
         if not self._loaded:
+            _ensure_model()
             model_path = os.path.abspath(_MODEL_PATH)
             base_options = mp_python.BaseOptions(model_asset_path=model_path)
             options = mp_vision.FaceLandmarkerOptions(
