@@ -176,9 +176,10 @@ class FaceAnalysisService:
         proj_matrix = np.hstack([rotation_mat, np.zeros((3, 1))])
         _, _, _, _, _, _, euler_angles = cv2.decomposeProjectionMatrix(proj_matrix)
 
-        pitch = float(euler_angles[0])
-        yaw   = float(euler_angles[1])
-        roll  = float(euler_angles[2])
+        # decomposeProjectionMatrix returns euler_angles with shape (3, 1)
+        pitch = float(euler_angles[0][0])
+        yaw   = float(euler_angles[1][0])
+        roll  = float(euler_angles[2][0])
 
         return yaw, pitch, roll
 
