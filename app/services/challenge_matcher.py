@@ -25,28 +25,28 @@ CHALLENGE_CONFIG = {
         "axis": "yaw",
         "direction": "negative",   # yaw < -threshold
         "threshold": settings.YAW_THRESHOLD,
-        "instruction": "Turn your head to the LEFT",
+        "instruction": "Slightly turn your head LEFT (keep face visible)",
         "emoji": "👈",
     },
     "look_right": {
         "axis": "yaw",
         "direction": "positive",   # yaw > +threshold
         "threshold": settings.YAW_THRESHOLD,
-        "instruction": "Turn your head to the RIGHT",
+        "instruction": "Slightly turn your head RIGHT (keep face visible)",
         "emoji": "👉",
     },
     "look_up": {
         "axis": "pitch",
         "direction": "negative",
         "threshold": settings.PITCH_THRESHOLD,
-        "instruction": "Tilt your head UP",
+        "instruction": "Slightly tilt your head UP",
         "emoji": "☝️",
     },
     "look_down": {
         "axis": "pitch",
         "direction": "positive",
         "threshold": settings.PITCH_THRESHOLD,
-        "instruction": "Tilt your head DOWN",
+        "instruction": "Slightly tilt your head DOWN",
         "emoji": "👇",
     },
     "smile": {
