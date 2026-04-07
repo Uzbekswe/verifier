@@ -11,4 +11,5 @@ build/
 *.log
 .idea/
 .vscode/
+.claude/
 models/face_landmarker.task
