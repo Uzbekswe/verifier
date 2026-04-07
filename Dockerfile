@@ -42,6 +42,13 @@ COPY --from=builder /install/deps /usr/local
 # Copy application source
 COPY app/ ./app/
 
+# Download the MediaPipe face landmarker model at build time so it's baked into
+# the image — avoids a runtime download on HuggingFace and pins to the version
+# that is compatible with mediapipe==0.10.33.
+RUN mkdir -p models && \
+    curl -L -o models/face_landmarker.task \
+    "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
+
 # Document the port the app listens on.
 # Hugging Face Spaces sets PORT=7860 automatically; docker run -p can remap it.
 EXPOSE 7860

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # Model path
 _MODEL_PATH = os.path.join(os.path.dirname(__file__), "../../models/face_landmarker.task")
-_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task"
+_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
 
 def _ensure_model():
     if not os.path.exists(_MODEL_PATH):
