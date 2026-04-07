@@ -10,8 +10,10 @@ import random
 import time
 import uuid
 
+import io
 import cv2
 import numpy as np
+from PIL import Image, ImageOps
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 
@@ -40,9 +42,16 @@ router = APIRouter(prefix="/verify", tags=["Verification v1"])
 
 
 def _decode_image(file_bytes: bytes) -> np.ndarray:
-    """Decode image bytes to BGR numpy array (runs in CV thread pool)."""
-    nparr = np.frombuffer(file_bytes, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    """Decode image bytes to BGR numpy array, applying EXIF rotation (runs in CV thread pool).
+
+    cv2.imdecode ignores EXIF orientation metadata, which causes face detection
+    to fail on mobile selfies (the image arrives sideways/upside-down to MediaPipe).
+    PIL's exif_transpose() corrects the orientation before handing off to OpenCV.
+    """
+    pil_img = Image.open(io.BytesIO(file_bytes))
+    pil_img = ImageOps.exif_transpose(pil_img)
+    pil_img = pil_img.convert("RGB")
+    img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
     if img is None:
         raise ImageDecodeError()
     return img
