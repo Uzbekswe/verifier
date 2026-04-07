@@ -93,48 +93,52 @@ class FaceAnalysisService:
         Run full face analysis pipeline on a BGR image.
         Returns FaceAnalysis with pose angles and smile score.
         """
-        if not self._loaded:
-            self.load()
+        try:
+            if not self._loaded:
+                self.load()
 
-        h, w = image_bgr.shape[:2]
-        image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
+            h, w = image_bgr.shape[:2]
+            image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
 
-        result = self._detector.detect(mp_image)
+            result = self._detector.detect(mp_image)
 
-        if not result.face_landmarks:
+            if not result.face_landmarks:
+                return FaceAnalysis(face_detected=False)
+
+            face_landmarks = result.face_landmarks[0]
+
+            # Convert normalized landmarks → pixel coords
+            lm_array = np.array([
+                [lm.x * w, lm.y * h, lm.z]
+                for lm in face_landmarks
+            ], dtype=np.float64)
+
+            # --- Head Pose via PnP ---
+            yaw, pitch, roll = self._estimate_pose(lm_array, w, h)
+
+            # --- Smile score ---
+            smile_score = self._compute_smile_score(lm_array, w, h)
+
+            # --- Face bounding box ---
+            xs = lm_array[:, 0]
+            ys = lm_array[:, 1]
+            x1, y1 = int(xs.min()), int(ys.min())
+            x2, y2 = int(xs.max()), int(ys.max())
+            bbox = (x1, y1, x2 - x1, y2 - y1)
+
+            return FaceAnalysis(
+                face_detected=True,
+                yaw=yaw,
+                pitch=pitch,
+                roll=roll,
+                smile_score=smile_score,
+                landmarks=lm_array,
+                face_bbox=bbox,
+            )
+        except Exception as e:
+            logger.warning(f"Face analysis failed: {e}")
             return FaceAnalysis(face_detected=False)
-
-        face_landmarks = result.face_landmarks[0]
-
-        # Convert normalized landmarks → pixel coords
-        lm_array = np.array([
-            [lm.x * w, lm.y * h, lm.z]
-            for lm in face_landmarks
-        ], dtype=np.float64)
-
-        # --- Head Pose via PnP ---
-        yaw, pitch, roll = self._estimate_pose(lm_array, w, h)
-
-        # --- Smile score ---
-        smile_score = self._compute_smile_score(lm_array, w, h)
-
-        # --- Face bounding box ---
-        xs = lm_array[:, 0]
-        ys = lm_array[:, 1]
-        x1, y1 = int(xs.min()), int(ys.min())
-        x2, y2 = int(xs.max()), int(ys.max())
-        bbox = (x1, y1, x2 - x1, y2 - y1)
-
-        return FaceAnalysis(
-            face_detected=True,
-            yaw=yaw,
-            pitch=pitch,
-            roll=roll,
-            smile_score=smile_score,
-            landmarks=lm_array,
-            face_bbox=bbox,
-        )
 
     def _estimate_pose(self, lm_array: np.ndarray, img_w: int, img_h: int):
         """
