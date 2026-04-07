@@ -1,3 +1,12 @@
+---
+title: FaceCheck
+emoji: 🤳
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # Photo Verification API
 
 A production-grade **selfie verification API** that mimics the pose-challenge system used by apps like Bumble and Tinder. It detects whether you're a real person (liveness check) and whether you correctly completed a pose challenge (look left, look right, smile, etc.).

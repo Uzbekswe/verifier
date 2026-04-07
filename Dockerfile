@@ -35,9 +35,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy installed Python packages from the builder stage
 COPY --from=builder /install/deps /usr/local
 
-# Copy application source and the pretrained face landmark model
+# Copy application source
 COPY app/ ./app/
-COPY models/ ./models/
 
 # Document the port the app listens on.
 # Hugging Face Spaces sets PORT=7860 automatically; docker run -p can remap it.
